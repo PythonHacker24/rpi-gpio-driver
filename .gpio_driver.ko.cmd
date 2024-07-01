@@ -1,0 +1,1 @@
+savedcmd_/home/maverick/gpio_driver/gpio_driver.ko := ld -r -EL  -maarch64elf -z noexecstack --no-warn-rwx-segments --build-id=sha1  -T arch/arm64/module.lds -o /home/maverick/gpio_driver/gpio_driver.ko /home/maverick/gpio_driver/gpio_driver.o /home/maverick/gpio_driver/gpio_driver.mod.o;  true

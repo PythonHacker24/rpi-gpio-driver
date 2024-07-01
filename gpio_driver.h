@@ -1,12 +1,16 @@
 #ifndef MY_DRIVER_H
 #define MY_DRIVER_H
 
+#include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/proc_fs.h>
-#include <linux/gpio.h> 
+#include <linux/slab.h>
+#include <linux/uaccess.h>
+#include <asm/io.h>
 
-#define GPIO_PIN 4
+#define MAX_USER_SIZE 1024
+#define BCM2711_GPIO_ADDRESS 0xf0200000 
 #define PROC_FILENAME "maverick" 
 
 MODULE_LICENSE("GPL");
