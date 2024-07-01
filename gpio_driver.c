@@ -1,5 +1,9 @@
 #include "gpio_driver.h"
 
+#define LLL_MAX_USER_SIZE 1024 
+
+static char data_buffer[LLL_MAX_USER_SIZE + 1] = {0};
+
 static unsigned int *gpio_registers = NULL;
 
 static void gpio_pin_on(unsigned int pin) {
@@ -23,53 +27,47 @@ static void gpio_pin_off(unsigned int pin) {
 }
 
 static ssize_t driver_proc_write(struct file *file_pointer, const char __user *user_buffer, size_t count, loff_t *offset) {
-	printk("KERN_INFO [PROC_WRITE] EXECUTION STARTED\n");
+	unsigned int pin = UINT_MAX;
+	unsigned int value = UINT_MAX;
 
-	char *kernel_buffer;
-	
-	kernel_buffer = kmalloc(count + 1, GFP_KERNEL); 
+	memset(data_buffer, 0x0, sizeof(data_buffer));
 
-	if (!kernel_buffer) {
-		printk(KERN_ALERT "MEMORY ALLOCATION FOR KERNEL_BUFFER FAILED!\n");
-		return -ENOMEM;
+	if (count > LLL_MAX_USER_SIZE)
+	{
+		count = LLL_MAX_USER_SIZE;
 	}
 
-	if (!user_buffer) {
-    		printk(KERN_ALERT "USER BUFFER IS NULL\n");
-    		kfree(kernel_buffer);
-		return -EFAULT;
+	if (copy_from_user(data_buffer, user_buffer, count))
+		return 0;
+
+	if (sscanf(data_buffer, "%d,%d", &pin, &value) != 2)
+	{
+		printk("Inproper data format submitted\n");
+		return count;
 	}
 
-	if (!access_ok(user_buffer, count)) {
-    		printk(KERN_ALERT "User buffer access not OK\n");
-    		kfree(kernel_buffer);
-    		return -EFAULT;
+	if (pin > 21 || pin < 0)
+	{
+		printk("Invalid pin number submitted\n");
+		return count;
 	}
 
-	if (copy_from_user(kernel_buffer, user_buffer, count)) {
-		printk(KERN_ALERT "COPY TO USER SPACE FAILED\n");
-		kfree(kernel_buffer); 
-		return -EFAULT; 
+	if (value != 0 && value != 1)
+	{
+		printk("Invalid on/off value\n");
+		return count;
 	}
 
-	kernel_buffer[count] = '\0'; 
-
-	printk(KERN_INFO "Message to Kernel Recieved: %s\n", kernel_buffer); 
-	
-	if (kernel_buffer[0] == '1') {
-		printk(KERN_INFO "21 TURN ON\n");
-		gpio_pin_on(21);
-	} else if (kernel_buffer[0] == '0') {
-		printk(KERN_INFO "21 TURN OFF\n");
-		gpio_pin_off(21);
-	} else {
-		printk(KERN_ALERT "INVALID VALUE\n");
-		return -EINVAL; 
+	printk("You said pin %d, value %d\n", pin, value);
+	if (value == 1)
+	{
+		gpio_pin_on(pin);
+	} else if (value == 0)
+	{
+		gpio_pin_off(pin);
 	}
 
-	kfree(kernel_buffer);
-
-	return count; 
+	return count;
 }
 
 static struct proc_dir_entry *proc_file; 
