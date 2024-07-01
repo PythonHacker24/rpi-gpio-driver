@@ -2,8 +2,7 @@
 
 static unsigned int *gpio_registers = NULL;
 
-static void gpio_pin_on(unsigned int pin)
-{
+static void gpio_pin_on(unsigned int pin) {
 	unsigned int fsel_index = pin/10;
 	unsigned int fsel_bitpos = pin%10;
 	unsigned int* gpio_fsel = gpio_registers + fsel_index;
@@ -17,8 +16,7 @@ static void gpio_pin_on(unsigned int pin)
 }
 
 
-static void gpio_pin_off(unsigned int pin)
-{
+static void gpio_pin_off(unsigned int pin) {
 	unsigned int *gpio_off_register = (unsigned int*)((char*)gpio_registers + 0x28);
 	*gpio_off_register |= (1<<pin);
 	return;
@@ -32,11 +30,23 @@ static ssize_t driver_proc_write(struct file *file_pointer, const char __user *u
 	kernel_buffer = kmalloc(count + 1, GFP_KERNEL); 
 
 	if (!kernel_buffer) {
-		printk(KERN_ALERT "Memory Allocation in Kernel Space Failed!\n");
+		printk(KERN_ALERT "MEMORY ALLOCATION FOR KERNEL_BUFFER FAILED!\n");
 		return -ENOMEM;
 	}
 
-	if (copy_to_user(kernel_buffer, user_buffer, count)) {
+	if (!user_buffer) {
+    		printk(KERN_ALERT "USER BUFFER IS NULL\n");
+    		kfree(kernel_buffer);
+		return -EFAULT;
+	}
+
+	if (!access_ok(user_buffer, count)) {
+    		printk(KERN_ALERT "User buffer access not OK\n");
+    		kfree(kernel_buffer);
+    		return -EFAULT;
+	}
+
+	if (copy_from_user(kernel_buffer, user_buffer, count)) {
 		printk(KERN_ALERT "COPY TO USER SPACE FAILED\n");
 		kfree(kernel_buffer); 
 		return -EFAULT; 
@@ -47,8 +57,10 @@ static ssize_t driver_proc_write(struct file *file_pointer, const char __user *u
 	printk(KERN_INFO "Message to Kernel Recieved: %s\n", kernel_buffer); 
 	
 	if (kernel_buffer[0] == '1') {
+		printk(KERN_INFO "21 TURN ON\n");
 		gpio_pin_on(21);
 	} else if (kernel_buffer[0] == '0') {
+		printk(KERN_INFO "21 TURN OFF\n");
 		gpio_pin_off(21);
 	} else {
 		printk(KERN_ALERT "INVALID VALUE\n");
