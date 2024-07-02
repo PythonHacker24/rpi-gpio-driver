@@ -42,23 +42,22 @@ static ssize_t driver_proc_write(struct file *file_pointer, const char __user *u
 
 	if (sscanf(data_buffer, "%d,%d", &pin, &value) != 2)
 	{
-		printk("Inproper data format submitted\n");
+		printk(KERN_ALERT "INVALID DATA FORMAT\n");
 		return count;
 	}
 
 	if (pin > 21 || pin < 0)
 	{
-		printk("Invalid pin number submitted\n");
+		printk(KERN_ALERT "INVALID PIN NUMBER\n");
 		return count;
 	}
 
 	if (value != 0 && value != 1)
 	{
-		printk("Invalid on/off value\n");
+		printk(KERN_ALERT "INVALID ON/OFF VALUE\n");
 		return count;
 	}
 
-	printk("You said pin %d, value %d\n", pin, value);
 	if (value == 1)
 	{
 		gpio_pin_on(pin);
