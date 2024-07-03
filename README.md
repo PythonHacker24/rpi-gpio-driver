@@ -1,5 +1,7 @@
 # Raspberry Pi 4 GPIO Access Kernel Driver for Linux 
 
+![White Minimalist Profile LinkedIn Banner (1)](https://github.com/PythonHacker24/rpi-gpio-driver/assets/72488360/e7fc8b69-5c37-4668-8c7a-a263fd336357)
+
 ## Introduction 
 This is a GPIO Driver for Raspberry Pi 4 with Direct Memory Access to GPIO register and turning it ON/OFF. It is a /proc based driver. 
 This is an experimental driver for controlling GPIO pins and is free to modify and distribute under GPL-2 License. 
